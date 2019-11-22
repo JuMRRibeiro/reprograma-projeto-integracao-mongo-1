@@ -12,4 +12,8 @@ router.get("/:cpf", controller.getCpf);
 //a rota que inclui o registro no banco de dados
 router.post("/", controller.postCliente);//importa a rota para o controller consumir
 
+router.put("/:cpf", controller.updateCliente)
+
+router.delete("/:cpf", controller.deletarCliente)
+
 module.exports = router

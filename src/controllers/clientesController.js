@@ -1,6 +1,7 @@
 
 //informar as requisicoes e onde ele vai buscar as informacoes 
 const Clientes = require('../model/clientes')//faz a consulta no banco de dados ao inves do json
+const Joi = require('joi')
 
 const fs = require('fs');
 
@@ -58,4 +59,49 @@ exports.postCliente = (req, res) => {//exporta a rota para a route consumir
     if (err) res.status(500).send(err);//volta erro se nao estiver igual ao schema
     res.status(201).send({ status: true, message: ' Cliente incluido com sucesso' });
   })
+}
+exports.updateCliente = (req, res) => {
+  if (!validaFormulario(req.body)) return res.status(400).send({message: "Campo inválido!"});
+  Clientes.update(
+    { cpf: req.params.cpf },
+    { $set: req.body },
+    { upsert: true },
+    function (err) {
+      if (err) return res.status(500).send(err);
+      res.status(200).send({ message: "Atualizado com sucesso!" });
+    })
+}
+
+const validaFormulario = (campos) => {
+  const schema = {
+    nome: Joi.string().min(1).required(),
+    email: Joi.string().min(1).required(),
+  }
+const validation = Joi.validade(campos, schema);
+
+  if(validation.error){
+  return false;
+}
+return true;
+}
+
+exports.deletarCliente = (req,res) => {
+
+  const cpfCliente = req.params.cpf;
+
+  Clientes.findByCpf(cpfCliente, function(err, cliente){
+
+    if (err) return res.status(500).send(err);
+
+    if (!cliente) {
+      return res.status(200).send({message: "Infelizmente não localizei o Cliente!"});
+    }
+
+    cliente.remove(function (err){
+    if (!err){
+      res.status(204).send({message:"Cliente removido com sucesso!"})
+    }
+
+  })
+})
 }
