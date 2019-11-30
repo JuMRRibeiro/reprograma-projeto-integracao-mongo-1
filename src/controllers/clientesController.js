@@ -2,6 +2,8 @@
 //informar as requisicoes e onde ele vai buscar as informacoes 
 const Clientes = require('../model/clientes')//faz a consulta no banco de dados ao inves do json
 const Joi = require('joi')
+const bcrypt = require("bcryptjs");
+const bcryptSalt = 8;
 
 const fs = require('fs');
 
@@ -60,6 +62,33 @@ exports.postCliente = (req, res) => {//exporta a rota para a route consumir
     res.status(201).send({ status: true, message: ' Cliente incluido com sucesso' });
   })
 }
+exports.post = async (req, res) => { 
+
+  const { nome, password, email, cpf, dataNascimento, estadoCivil, telefone, comprou } = req.body;
+  console.log(req.body);
+  const salt = bcrypt.genSaltSync(bcryptSalt);
+  //try {
+    //const {nome, password, email, cpf, dataNascimento, estadoCivil, telefone, comprou} = req.body;
+    
+    
+    const hashPass = await bcrypt.hashSync(password, salt);
+    const newCliente = new Clientes({nome, hassPass, email, cpf, dataNascimento, estadoCivil, telefone, comprou})
+    Clientes.save()
+    //cliente.save(function (err)  {
+     // .then(() =>{
+res.status(200).json("novo Cliente criado")
+      //});
+      if (err) {
+        return res.status(500).send({ message: err });
+      }
+      console.log("The file was saved!");
+    //});
+    //return res.status(201).send(clientes); 
+    //} catch (e) {
+    //return res.status(401).json({ error: 'erro' });
+    }
+
+
 exports.updateCliente = (req, res) => {
   if (!validaFormulario(req.body)) return res.status(400).send({message: "Campo inválido!"});
   Clientes.update(
